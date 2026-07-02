@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bares cutres de Múnich
 
-## Getting Started
+Mapa interactivo con [100 bares cutres de Múnich](https://www.google.com/maps/d/viewer?mid=1v2JwzCR7tzoIXnyutpcvhmofkMxc884), basado en el [Google My Maps original](https://www.google.com/maps/d/u/1/edit?mid=1v2JwzCR7tzoIXnyutpcvhmofkMxc884&usp=sharing).
 
-First, run the development server:
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Desplegar en Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Sube el repo a GitHub (o conéctalo directamente desde la carpeta del proyecto).
+2. Ve a [vercel.com/new](https://vercel.com/new) e importa el repositorio.
+3. Vercel detecta Next.js automáticamente — no hace falta configuración extra.
+4. Pulsa **Deploy**.
 
-## Learn More
+También puedes desplegar desde la CLI:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx vercel
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Actualizar los bares
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Los datos están en `src/data/bars.json`, exportados del KML de Google My Maps:
 
-## Deploy on Vercel
+```bash
+curl -sL "https://www.google.com/maps/d/kml?mid=1v2JwzCR7tzoIXnyutpcvhmofkMxc884" -o /tmp/bares.kmz
+unzip -p /tmp/bares.kmz doc.kml > /tmp/bares.kml
+# Luego vuelve a generar bars.json con el script de parseo
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org/) (App Router)
+- [Leaflet](https://leafletjs.com/) + [react-leaflet](https://react-leaflet.js.org/)
+- [OpenStreetMap](https://www.openstreetmap.org/) tiles
+- [Tailwind CSS](https://tailwindcss.com/)
