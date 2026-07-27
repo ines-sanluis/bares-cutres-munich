@@ -155,8 +155,7 @@ export default function VisitModal({
 
             <div className="grid grid-cols-2 gap-3">
               <label className="flex flex-col gap-1 text-xs text-stone-500">
-                Fecha{" "}
-                <span className="text-stone-400">(vacío = no te acuerdas)</span>
+                Fecha
                 <input
                   type="date"
                   name="visitedOn"
@@ -183,7 +182,7 @@ export default function VisitModal({
             <div className="flex flex-col gap-2 rounded-lg border border-stone-200 bg-stone-50 p-3">
               <BeerRating
                 name="voteInes"
-                label="Ines"
+                label="Inés"
                 defaultValue={visit?.voteInes ?? null}
               />
               <BeerRating
