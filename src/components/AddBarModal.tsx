@@ -63,12 +63,12 @@ export default function AddBarModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-stone-900/40 p-4"
+      className="fixed inset-0 z-[1000] flex items-end justify-center bg-stone-900/40 p-2 sm:items-center sm:p-4"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-stone-200 bg-surface shadow-xl"
+        className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-xl border border-stone-200 bg-surface shadow-xl"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -96,7 +96,8 @@ export default function AddBarModal({ onClose }: { onClose: () => void }) {
               maxLength={BAR_NAME_MAX_LENGTH}
               placeholder="Ej. Bar Centrale"
               autoComplete="off"
-              className="rounded-lg border border-stone-300 bg-white px-2 py-2 text-sm text-stone-800 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none"
+              // text-base on phones: anything smaller makes iOS zoom in on focus.
+              className="rounded-lg border border-stone-300 bg-white px-2 py-2 text-base text-stone-800 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none lg:text-sm"
             />
           </label>
 

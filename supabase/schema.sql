@@ -6,12 +6,31 @@ create table if not exists public.visits (
   visited       boolean not null default true,
   visited_on    date,
   beer_price    numeric(5, 2),
-  note          text,
+  note_ines     text,
+  note_fabienne text,
   vote_ines     smallint check (vote_ines between 1 and 5),
   vote_fabienne smallint check (vote_fabienne between 1 and 5),
   photo_path    text,
   updated_at    timestamptz not null default now()
 );
+
+-- Notes used to be a single 'note' column shared by both. Everything written
+-- there was Inés's, so the column becomes hers and Fabienne gets a new one.
+-- Guarded so the whole file stays safe to re-run on an existing database.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'visits'
+      and column_name = 'note'
+  ) then
+    alter table public.visits rename column note to note_ines;
+  end if;
+end $$;
+
+alter table public.visits add column if not exists note_ines text;
+alter table public.visits add column if not exists note_fabienne text;
 
 -- Bars discovered along the way, added from the app. The original 100 stay in
 -- src/data/bars.json and are never written to; keeping the additions in their

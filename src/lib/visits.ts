@@ -10,7 +10,8 @@ export type Visit = {
   visited: boolean;
   visitedOn: string | null;
   beerPrice: number | null;
-  note: string | null;
+  noteInes: string | null;
+  noteFabienne: string | null;
   voteInes: number | null;
   voteFabienne: number | null;
   photoPath: string | null;

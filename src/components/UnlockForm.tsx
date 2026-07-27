@@ -16,7 +16,8 @@ export default function UnlockForm({ hint }: { hint?: string }) {
           name="password"
           placeholder="Contraseña"
           autoComplete="current-password"
-          className="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none"
+          // text-base on phones: anything smaller makes iOS zoom in on focus.
+          className="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-base text-stone-800 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none lg:text-sm"
         />
         <button
           type="submit"

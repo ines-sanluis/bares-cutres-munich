@@ -8,7 +8,8 @@ type VisitRow = {
   visited: boolean;
   visited_on: string | null;
   beer_price: number | string | null;
-  note: string | null;
+  note_ines: string | null;
+  note_fabienne: string | null;
   vote_ines: number | null;
   vote_fabienne: number | null;
   photo_path: string | null;
@@ -26,7 +27,7 @@ export async function getVisits(): Promise<VisitMap> {
   const { data, error } = await supabase
     .from("visits")
     .select(
-      "bar_id, visited, visited_on, beer_price, note, vote_ines, vote_fabienne, photo_path",
+      "bar_id, visited, visited_on, beer_price, note_ines, note_fabienne, vote_ines, vote_fabienne, photo_path",
     );
 
   if (error) {
@@ -58,7 +59,8 @@ function toVisit(
     visited: row.visited,
     visitedOn: row.visited_on,
     beerPrice: price !== null && Number.isFinite(price) ? price : null,
-    note: row.note,
+    noteInes: row.note_ines,
+    noteFabienne: row.note_fabienne,
     voteInes: row.vote_ines,
     voteFabienne: row.vote_fabienne,
     photoPath: row.photo_path,

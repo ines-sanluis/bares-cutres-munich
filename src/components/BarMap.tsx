@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import {
   MapContainer,
@@ -70,11 +71,21 @@ function FlyToBar({ bar }: { bar: Bar | null }) {
   return null;
 }
 
-function VisitSummary({ visit }: { visit: Visit }) {
+function VisitSummary({ visit, barName }: { visit: Visit; barName: string }) {
   const score = averageVote(visit);
 
   return (
     <div className="mb-2 flex flex-col gap-0.5 text-xs text-stone-600">
+      {visit.photoUrl && (
+        // Fixed height, so the popup does not jump once the photo loads.
+        <Image
+          src={visit.photoUrl}
+          alt={`Foto de ${barName}`}
+          width={220}
+          height={112}
+          className="mb-1 h-28 w-full rounded-md object-cover"
+        />
+      )}
       {score !== null && (
         <span>
           🍺 {score.toFixed(1)} · Ines {visit.voteInes ?? "–"} / Fabienne{" "}
@@ -87,7 +98,12 @@ function VisitSummary({ visit }: { visit: Visit }) {
       <span className={visit.visitedOn ? "" : "italic"}>
         {visitDateLabel(visit.visitedOn)}
       </span>
-      {visit.note && <span className="italic">“{visit.note}”</span>}
+      {visit.noteInes && (
+        <span className="italic">Inés: “{visit.noteInes}”</span>
+      )}
+      {visit.noteFabienne && (
+        <span className="italic">Fabienne: “{visit.noteFabienne}”</span>
+      )}
     </div>
   );
 }
@@ -126,7 +142,11 @@ export default function BarMap({
             }}
           >
             <Popup>
-              <div className="min-w-[180px] font-sans">
+              <div
+                className={`font-sans ${
+                  visit?.photoUrl ? "min-w-[220px]" : "min-w-[180px]"
+                }`}
+              >
                 <p className="mb-2 text-sm font-semibold text-stone-900">
                   {bar.name}
                   {bar.origin === "extra" && (
@@ -136,7 +156,9 @@ export default function BarMap({
                   )}
                 </p>
 
-                {visit?.visited && <VisitSummary visit={visit} />}
+                {visit?.visited && (
+                  <VisitSummary visit={visit} barName={bar.name} />
+                )}
 
                 <div className="flex flex-col gap-1 text-xs">
                   <button

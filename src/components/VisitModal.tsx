@@ -18,8 +18,10 @@ type VisitModalProps = {
   onClose: () => void;
 };
 
+// text-base on phones: anything smaller makes iOS zoom in when the field is
+// focused, which leaves the modal half off-screen.
 const FIELD_CLASS =
-  "rounded-lg border border-stone-300 bg-white px-2 py-2 text-sm text-stone-800 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none";
+  "rounded-lg border border-stone-300 bg-white px-2 py-2 text-base text-stone-800 placeholder:text-stone-400 focus:border-amber-600 focus:outline-none lg:text-sm";
 
 export default function VisitModal({
   bar,
@@ -97,12 +99,12 @@ export default function VisitModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-stone-900/40 p-4"
+      className="fixed inset-0 z-[1000] flex items-end justify-center bg-stone-900/40 p-2 sm:items-center sm:p-4"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-stone-200 bg-surface shadow-xl"
+        className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-xl border border-stone-200 bg-surface shadow-xl"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -205,17 +207,31 @@ export default function VisitModal({
               />
             </div>
 
-            <label className="flex flex-col gap-1 text-xs text-stone-500">
-              Notas
-              <textarea
-                name="note"
-                rows={3}
-                maxLength={500}
-                placeholder="¿Qué tal el sitio?"
-                defaultValue={visit?.note ?? ""}
-                className={`resize-none ${FIELD_CLASS}`}
-              />
-            </label>
+            <div className="flex flex-col gap-2">
+              <label className="flex flex-col gap-1 text-xs text-stone-500">
+                Notas de Inés
+                <textarea
+                  name="noteInes"
+                  rows={3}
+                  maxLength={500}
+                  placeholder="¿Qué tal el sitio?"
+                  defaultValue={visit?.noteInes ?? ""}
+                  className={`resize-none ${FIELD_CLASS}`}
+                />
+              </label>
+
+              <label className="flex flex-col gap-1 text-xs text-stone-500">
+                Notas de Fabienne
+                <textarea
+                  name="noteFabienne"
+                  rows={3}
+                  maxLength={500}
+                  placeholder="¿Qué tal el sitio?"
+                  defaultValue={visit?.noteFabienne ?? ""}
+                  className={`resize-none ${FIELD_CLASS}`}
+                />
+              </label>
+            </div>
 
             <div className="flex flex-col gap-2">
               <span className="text-xs text-stone-500">Foto</span>
