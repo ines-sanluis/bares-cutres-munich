@@ -20,17 +20,21 @@ import {
   type VisitMap,
 } from "@/lib/visits";
 
-const MARKER_COLORS = {
-  visited: { fill: "#15803d", border: "#ffffff" },
-  pending: { fill: "#b45309", border: "#ffffff" },
+/**
+ * Every pin is the same white-ringed circle. Green still means visited and
+ * orange pending; the lighter shade of each is a bar added along the way, so
+ * the original 100 stay recognisable without a second shape.
+ */
+const MARKER_FILLS = {
+  original: { visited: "#15803d", pending: "#b45309" },
+  extra: { visited: "#34d399", pending: "#fb923c" },
 } as const;
 
-/**
- * Colour still means visited or not; the rounded square marks a bar that was
- * added later, so the original 100 stay recognisable on the map.
- */
 function markerIcon(visited: boolean, isExtra: boolean) {
-  const { fill, border } = MARKER_COLORS[visited ? "visited" : "pending"];
+  const fill =
+    MARKER_FILLS[isExtra ? "extra" : "original"][
+      visited ? "visited" : "pending"
+    ];
 
   return L.divIcon({
     className: "",
@@ -38,9 +42,9 @@ function markerIcon(visited: boolean, isExtra: boolean) {
       width: 14px;
       height: 14px;
       background: ${fill};
-      border: 2px solid ${isExtra ? "#7c3aed" : border};
-      border-radius: ${isExtra ? "3px" : "50%"};
-      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(41,37,36,0.45);
     "></div>`,
     iconSize: [14, 14],
     iconAnchor: [7, 7],
