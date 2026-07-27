@@ -2,13 +2,17 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --background: #0c0a09;
-  --foreground: #fafaf9;
+  /* Warm paper theme: cream background, ink-dark text. */
+  --background: #faf8f5;
+  --foreground: #292524;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* Cream page background and the white cards that sit on top of it. */
+  --color-paper: #faf8f5;
+  --color-surface: #ffffff;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -20,7 +24,7 @@ body {
 
 .leaflet-container {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
-  background: #1c1917;
+  background: #e7e5e4;
 }
 
 .leaflet-popup-content-wrapper {
