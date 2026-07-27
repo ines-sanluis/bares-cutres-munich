@@ -12,6 +12,7 @@ import {
 import L from "leaflet";
 import { barId, type Bar } from "@/data/bars";
 import { googleMapsDirectionsUrl, googleMapsUrl } from "@/data/bars";
+import { MARKER_FILLS } from "@/lib/marker-colors";
 import {
   averageVote,
   formatPrice,
@@ -21,15 +22,9 @@ import {
 } from "@/lib/visits";
 
 /**
- * Every pin is the same white-ringed circle. Green still means visited and
- * orange pending; the lighter shade of each is a bar added along the way, so
- * the original 100 stay recognisable without a second shape.
+ * Every pin is the same white-ringed circle; only the fill changes, so the
+ * original 100 stay recognisable without needing a second shape.
  */
-const MARKER_FILLS = {
-  original: { visited: "#15803d", pending: "#b45309" },
-  extra: { visited: "#34d399", pending: "#fb923c" },
-} as const;
-
 function markerIcon(visited: boolean, isExtra: boolean) {
   const fill =
     MARKER_FILLS[isExtra ? "extra" : "original"][
@@ -155,7 +150,7 @@ export default function BarMap({
                   {bar.name}
                   {bar.origin === "extra" && (
                     <span className="ml-1.5 rounded bg-violet-100 px-1 py-0.5 text-[10px] font-semibold text-violet-700">
-                      NUEVO
+                      EXTRA
                     </span>
                   )}
                 </p>

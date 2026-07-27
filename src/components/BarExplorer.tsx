@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { lock } from "@/app/auth-actions";
 import { bars, barId, type Bar, GOOGLE_MAPS_ID } from "@/data/bars";
@@ -189,7 +190,7 @@ export default function BarExplorer({
               onClick={() => setAddingBar(true)}
               className="w-full rounded-lg border border-dashed border-violet-300 px-3 py-2 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-50"
             >
-              + Añadir un bar nuevo
+              + Añadir un bar extra
             </button>
           </div>
         )}
@@ -226,7 +227,7 @@ export default function BarExplorer({
                           title="No está en los 100 originales"
                           className="shrink-0 rounded bg-violet-100 px-1 py-0.5 text-[10px] font-semibold text-violet-700"
                         >
-                          NUEVO
+                          EXTRA
                         </span>
                       )}
                     </span>
@@ -276,17 +277,25 @@ export default function BarExplorer({
         </div>
 
         <div
-          className={`shrink-0 border-t border-stone-200 p-3 text-xs text-stone-500 ${foldable}`}
+          className={`flex shrink-0 items-center justify-between gap-2 border-t border-stone-200 p-3 text-xs text-stone-500 ${foldable}`}
         >
-          Datos del{" "}
-          <a
-            href={`https://www.google.com/maps/d/viewer?mid=${GOOGLE_MAPS_ID}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-amber-700 hover:underline"
+          <span>
+            Datos del{" "}
+            <a
+              href={`https://www.google.com/maps/d/viewer?mid=${GOOGLE_MAPS_ID}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-700 hover:underline"
+            >
+              mapa original
+            </a>
+          </span>
+          <Link
+            href="/about"
+            className="shrink-0 font-semibold text-amber-700 hover:underline"
           >
-            mapa original
-          </a>
+            Cómo funciona
+          </Link>
         </div>
       </aside>
 

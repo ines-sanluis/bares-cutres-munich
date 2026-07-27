@@ -115,7 +115,7 @@ export default function VisitModal({
             {bar.name}
             {isExtra && (
               <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 align-middle">
-                NUEVO
+                EXTRA
               </span>
             )}
           </h2>
