@@ -13,6 +13,14 @@ export type VisitFormState = {
 
 export const emptyVisitFormState: VisitFormState = { ok: false, error: null };
 
+/** Same shape as a visit write, but for adding or removing an extra bar. */
+export type BarFormState = {
+  ok: boolean;
+  error: string | null;
+};
+
+export const emptyBarFormState: BarFormState = { ok: false, error: null };
+
 export type AuthState = {
   error: string | null;
 };

@@ -24,7 +24,11 @@ const MARKER_COLORS = {
   pending: { fill: "#b45309", border: "#ffffff" },
 } as const;
 
-function markerIcon(visited: boolean) {
+/**
+ * Colour still means visited or not; the rounded square marks a bar that was
+ * added later, so the original 100 stay recognisable on the map.
+ */
+function markerIcon(visited: boolean, isExtra: boolean) {
   const { fill, border } = MARKER_COLORS[visited ? "visited" : "pending"];
 
   return L.divIcon({
@@ -33,8 +37,8 @@ function markerIcon(visited: boolean) {
       width: 14px;
       height: 14px;
       background: ${fill};
-      border: 2px solid ${border};
-      border-radius: 50%;
+      border: 2px solid ${isExtra ? "#7c3aed" : border};
+      border-radius: ${isExtra ? "3px" : "50%"};
       box-shadow: 0 1px 4px rgba(0,0,0,0.4);
     "></div>`,
     iconSize: [14, 14],
@@ -108,14 +112,15 @@ export default function BarMap({
   const markers = useMemo(
     () =>
       bars.map((bar) => {
-        const visit = visits[barId(bar)];
+        const id = barId(bar);
+        const visit = visits[id];
         const isVisited = visit?.visited ?? false;
 
         return (
           <Marker
-            key={`${bar.name}-${bar.lat}-${bar.lng}`}
+            key={id}
             position={[bar.lat, bar.lng]}
-            icon={markerIcon(isVisited)}
+            icon={markerIcon(isVisited, bar.origin === "extra")}
             eventHandlers={{
               click: () => onSelectBar(bar),
             }}
@@ -124,6 +129,11 @@ export default function BarMap({
               <div className="min-w-[180px] font-sans">
                 <p className="mb-2 text-sm font-semibold text-stone-900">
                   {bar.name}
+                  {bar.origin === "extra" && (
+                    <span className="ml-1.5 rounded bg-violet-100 px-1 py-0.5 text-[10px] font-semibold text-violet-700">
+                      NUEVO
+                    </span>
+                  )}
                 </p>
 
                 {visit?.visited && <VisitSummary visit={visit} />}

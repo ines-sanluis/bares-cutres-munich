@@ -11,6 +11,7 @@ import {
   visitStats,
   type VisitMap,
 } from "@/lib/visits";
+import AddBarModal from "./AddBarModal";
 import UnlockForm from "./UnlockForm";
 import VisitModal from "./VisitModal";
 
@@ -33,22 +34,33 @@ const FILTER_LABELS: Record<Filter, string> = {
 
 export default function BarExplorer({
   visits,
+  extraBars,
   unlocked,
 }: {
   visits: VisitMap;
+  extraBars: Bar[];
   unlocked: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [selectedBar, setSelectedBar] = useState<Bar | null>(null);
   const [editingBar, setEditingBar] = useState<Bar | null>(null);
+  const [addingBar, setAddingBar] = useState(false);
 
+  const allBars = useMemo(() => [...bars, ...extraBars], [extraBars]);
+
+  // Deliberately the original 100 only: the challenge progress must not move
+  // because a new bar was added.
   const stats = useMemo(() => visitStats(bars, visits), [visits]);
+  const extraStats = useMemo(
+    () => visitStats(extraBars, visits),
+    [extraBars, visits],
+  );
 
   const filteredBars = useMemo(() => {
     const q = query.trim().toLowerCase();
 
-    return bars.filter((bar) => {
+    return allBars.filter((bar) => {
       if (q && !bar.name.toLowerCase().includes(q)) return false;
 
       const isVisited = visits[barId(bar)]?.visited ?? false;
@@ -56,7 +68,7 @@ export default function BarExplorer({
       if (filter === "pending") return !isVisited;
       return true;
     });
-  }, [query, filter, visits]);
+  }, [allBars, query, filter, visits]);
 
   const openBar = (bar: Bar) => {
     setSelectedBar(bar);
@@ -71,7 +83,7 @@ export default function BarExplorer({
             Bares cutres de Múnich
           </h1>
           <p className="mt-1 text-sm text-stone-500">
-            {filteredBars.length} de {bars.length} bares
+            {filteredBars.length} de {allBars.length} bares
           </p>
           <input
             type="search"
@@ -128,17 +140,38 @@ export default function BarExplorer({
                 : "—"}
             </dd>
           </div>
+          {extraStats.total > 0 && (
+            <div className="col-span-2">
+              <dt className="text-stone-500">Añadidos por vosotras</dt>
+              <dd className="font-semibold text-violet-700">
+                +{extraStats.total} · {extraStats.visitedCount} visitado
+                {extraStats.visitedCount === 1 ? "" : "s"}
+              </dd>
+            </div>
+          )}
         </dl>
+
+        {unlocked && (
+          <div className="border-b border-stone-200 px-4 py-3">
+            <button
+              type="button"
+              onClick={() => setAddingBar(true)}
+              className="w-full rounded-lg border border-dashed border-violet-300 px-3 py-2 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-50"
+            >
+              + Añadir un bar nuevo
+            </button>
+          </div>
+        )}
 
         <ul className="max-h-48 flex-1 overflow-y-auto lg:max-h-none">
           {filteredBars.map((bar) => {
-            const visit = visits[barId(bar)];
+            const id = barId(bar);
+            const visit = visits[id];
             const score = averageVote(visit);
-            const isSelected =
-              selectedBar?.name === bar.name && selectedBar?.lat === bar.lat;
+            const isSelected = selectedBar !== null && barId(selectedBar) === id;
 
             return (
-              <li key={`${bar.name}-${bar.lat}`}>
+              <li key={id}>
                 <button
                   type="button"
                   onClick={() => openBar(bar)}
@@ -153,7 +186,17 @@ export default function BarExplorer({
                     }`}
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate">{bar.name}</span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="min-w-0 truncate">{bar.name}</span>
+                      {bar.origin === "extra" && (
+                        <span
+                          title="No está en los 100 originales"
+                          className="shrink-0 rounded bg-violet-100 px-1 py-0.5 text-[10px] font-semibold text-violet-700"
+                        >
+                          NUEVO
+                        </span>
+                      )}
+                    </span>
                     {visit?.visited && (
                       <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-stone-500">
                         {score !== null && (
@@ -231,6 +274,8 @@ export default function BarExplorer({
           onClose={() => setEditingBar(null)}
         />
       )}
+
+      {addingBar && <AddBarModal onClose={() => setAddingBar(false)} />}
     </div>
   );
 }

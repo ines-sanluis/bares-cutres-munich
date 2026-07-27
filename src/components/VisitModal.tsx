@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { deleteVisit, saveVisit } from "@/app/actions";
+import { deleteBar, deleteVisit, saveVisit } from "@/app/actions";
 import type { Bar } from "@/data/bars";
 import { barId } from "@/data/bars";
-import { emptyVisitFormState } from "@/lib/form-state";
+import { emptyBarFormState, emptyVisitFormState } from "@/lib/form-state";
 import { resizeImage } from "@/lib/resize-image";
 import type { Visit } from "@/lib/visits";
 import BeerRating from "./BeerRating";
@@ -37,6 +37,10 @@ export default function VisitModal({
     deleteVisit,
     emptyVisitFormState,
   );
+  const [removeBarState, removeBarAction, removingBar] = useActionState(
+    deleteBar,
+    emptyBarFormState,
+  );
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -46,8 +50,8 @@ export default function VisitModal({
 
   // Close once the server confirms the write.
   useEffect(() => {
-    if (saveState.ok || deleteState.ok) onClose();
-  }, [saveState.ok, deleteState.ok, onClose]);
+    if (saveState.ok || deleteState.ok || removeBarState.ok) onClose();
+  }, [saveState.ok, deleteState.ok, removeBarState.ok, onClose]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -85,9 +89,11 @@ export default function VisitModal({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const busy = saving || deleting || preparingPhoto;
+  const busy = saving || deleting || removingBar || preparingPhoto;
   const existingPhotoUrl = photoRemoved ? null : (visit?.photoUrl ?? null);
-  const error = saveState.error ?? deleteState.error;
+  const error =
+    saveState.error ?? deleteState.error ?? removeBarState.error;
+  const isExtra = bar.origin === "extra";
 
   return (
     <div
@@ -103,7 +109,14 @@ export default function VisitModal({
         aria-label={bar.name}
       >
         <div className="flex items-start justify-between gap-3 border-b border-stone-200 p-4">
-          <h2 className="text-base font-bold text-amber-700">{bar.name}</h2>
+          <h2 className="text-base font-bold text-amber-700">
+            {bar.name}
+            {isExtra && (
+              <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 align-middle">
+                NUEVO
+              </span>
+            )}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -292,6 +305,32 @@ export default function VisitModal({
               className="w-full rounded-lg border border-rose-300 px-4 py-2 text-sm text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
             >
               {deleting ? "Borrando…" : "Borrar visita"}
+            </button>
+          </form>
+        )}
+
+        {/* Only extras can go: the original 100 are the challenge, not data. */}
+        {isExtra && unlocked && (
+          <form
+            action={removeBarAction}
+            className="border-t border-stone-200 p-4"
+            onSubmit={(event) => {
+              if (
+                !confirm(
+                  `¿Quitar ${bar.name} de la lista? Se borra el bar y su visita.`,
+                )
+              ) {
+                event.preventDefault();
+              }
+            }}
+          >
+            <input type="hidden" name="barId" value={id} />
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full rounded-lg px-4 py-2 text-xs text-stone-500 transition-colors hover:bg-rose-50 hover:text-rose-700 disabled:opacity-50"
+            >
+              {removingBar ? "Quitando…" : "Quitar este bar de la lista"}
             </button>
           </form>
         )}
