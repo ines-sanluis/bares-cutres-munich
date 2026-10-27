@@ -40,3 +40,21 @@ export async function getExtraBars(): Promise<Bar[]> {
 
   return extras;
 }
+
+/**
+ * Ids of the bars marked as closed for good. Empty when Supabase is not
+ * configured or the table is missing, so the app still renders.
+ */
+export async function getClosedBarIds(): Promise<string[]> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.from("closed_bars").select("bar_id");
+
+  if (error) {
+    console.error("No se pudieron cargar los bares cerrados:", error.message);
+    return [];
+  }
+
+  return ((data ?? []) as { bar_id: string }[]).map((row) => row.bar_id);
+}

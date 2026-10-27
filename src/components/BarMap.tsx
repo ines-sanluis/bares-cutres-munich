@@ -12,7 +12,7 @@ import {
 import L from "leaflet";
 import { barId, type Bar } from "@/data/bars";
 import { googleMapsDirectionsUrl, googleMapsUrl } from "@/data/bars";
-import { MARKER_FILLS } from "@/lib/marker-colors";
+import { CLOSED_FILL, MARKER_FILLS } from "@/lib/marker-colors";
 import {
   averageVote,
   formatPrice,
@@ -25,11 +25,12 @@ import {
  * Every pin is the same white-ringed circle; only the fill changes, so the
  * original 100 stay recognisable without needing a second shape.
  */
-function markerIcon(visited: boolean, isExtra: boolean) {
-  const fill =
-    MARKER_FILLS[isExtra ? "extra" : "original"][
-      visited ? "visited" : "pending"
-    ];
+function markerIcon(visited: boolean, isExtra: boolean, closed: boolean) {
+  const fill = closed
+    ? CLOSED_FILL
+    : MARKER_FILLS[isExtra ? "extra" : "original"][
+        visited ? "visited" : "pending"
+      ];
 
   return L.divIcon({
     className: "",
@@ -110,6 +111,7 @@ function VisitSummary({ visit, barName }: { visit: Visit; barName: string }) {
 type BarMapProps = {
   bars: Bar[];
   visits: VisitMap;
+  closedBars: Set<string>;
   selectedBar: Bar | null;
   unlocked: boolean;
   onSelectBar: (bar: Bar) => void;
@@ -119,6 +121,7 @@ type BarMapProps = {
 export default function BarMap({
   bars,
   visits,
+  closedBars,
   selectedBar,
   unlocked,
   onSelectBar,
@@ -130,12 +133,13 @@ export default function BarMap({
         const id = barId(bar);
         const visit = visits[id];
         const isVisited = visit?.visited ?? false;
+        const isClosed = closedBars.has(id);
 
         return (
           <Marker
             key={id}
             position={[bar.lat, bar.lng]}
-            icon={markerIcon(isVisited, bar.origin === "extra")}
+            icon={markerIcon(isVisited, bar.origin === "extra", isClosed)}
             eventHandlers={{
               click: () => onSelectBar(bar),
             }}
@@ -154,6 +158,12 @@ export default function BarMap({
                     </span>
                   )}
                 </p>
+
+                {isClosed && (
+                  <p className="mb-2 text-xs font-semibold text-red-600">
+                    ● Cerrado para siempre
+                  </p>
+                )}
 
                 {visit?.visited && (
                   <VisitSummary visit={visit} barName={bar.name} />
@@ -193,7 +203,7 @@ export default function BarMap({
           </Marker>
         );
       }),
-    [bars, visits, unlocked, onSelectBar, onEditBar],
+    [bars, visits, closedBars, unlocked, onSelectBar, onEditBar],
   );
 
   return (

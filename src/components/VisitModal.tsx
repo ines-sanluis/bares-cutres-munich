@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { deleteBar, deleteVisit, saveVisit } from "@/app/actions";
+import { deleteBar, deleteVisit, saveVisit, setBarClosed } from "@/app/actions";
 import type { Bar } from "@/data/bars";
 import { barId } from "@/data/bars";
 import { emptyBarFormState, emptyVisitFormState } from "@/lib/form-state";
@@ -14,6 +14,7 @@ import UnlockForm from "./UnlockForm";
 type VisitModalProps = {
   bar: Bar;
   visit: Visit | undefined;
+  closed: boolean;
   unlocked: boolean;
   onClose: () => void;
 };
@@ -26,6 +27,7 @@ const FIELD_CLASS =
 export default function VisitModal({
   bar,
   visit,
+  closed,
   unlocked,
   onClose,
 }: VisitModalProps) {
@@ -43,6 +45,10 @@ export default function VisitModal({
     deleteBar,
     emptyBarFormState,
   );
+  const [closedState, closedAction, togglingClosed] = useActionState(
+    setBarClosed,
+    emptyBarFormState,
+  );
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -52,8 +58,15 @@ export default function VisitModal({
 
   // Close once the server confirms the write.
   useEffect(() => {
-    if (saveState.ok || deleteState.ok || removeBarState.ok) onClose();
-  }, [saveState.ok, deleteState.ok, removeBarState.ok, onClose]);
+    if (saveState.ok || deleteState.ok || removeBarState.ok || closedState.ok)
+      onClose();
+  }, [
+    saveState.ok,
+    deleteState.ok,
+    removeBarState.ok,
+    closedState.ok,
+    onClose,
+  ]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -91,10 +104,14 @@ export default function VisitModal({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const busy = saving || deleting || removingBar || preparingPhoto;
+  const busy =
+    saving || deleting || removingBar || togglingClosed || preparingPhoto;
   const existingPhotoUrl = photoRemoved ? null : (visit?.photoUrl ?? null);
   const error =
-    saveState.error ?? deleteState.error ?? removeBarState.error;
+    saveState.error ??
+    deleteState.error ??
+    removeBarState.error ??
+    closedState.error;
   const isExtra = bar.origin === "extra";
 
   return (
@@ -119,6 +136,12 @@ export default function VisitModal({
               </span>
             )}
           </h2>
+          {closed && (
+            <span className="mt-0.5 flex shrink-0 items-center gap-1 text-xs font-semibold text-red-600">
+              <span aria-hidden className="size-2 rounded-full bg-red-600" />
+              Cerrado para siempre
+            </span>
+          )}
           <button
             type="button"
             onClick={onClose}
@@ -321,6 +344,39 @@ export default function VisitModal({
               className="w-full rounded-lg border border-rose-300 px-4 py-2 text-sm text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-50"
             >
               {deleting ? "Borrando…" : "Borrar visita"}
+            </button>
+          </form>
+        )}
+
+        {/* Separate from the visit: a bar can close before anyone went, and
+            deleting the visit must not quietly reopen it. */}
+        {unlocked && (
+          <form
+            action={closedAction}
+            className="border-t border-stone-200 p-4"
+            onSubmit={(event) => {
+              const question = closed
+                ? `¿Reabrir ${bar.name}?`
+                : `¿Marcar ${bar.name} como cerrado para siempre?`;
+              if (!confirm(question)) event.preventDefault();
+            }}
+          >
+            <input type="hidden" name="barId" value={id} />
+            <input type="hidden" name="closed" value={closed ? "false" : "true"} />
+            <button
+              type="submit"
+              disabled={busy}
+              className={`w-full rounded-lg border px-4 py-2 text-sm transition-colors disabled:opacity-50 ${
+                closed
+                  ? "border-stone-300 text-stone-600 hover:bg-stone-50"
+                  : "border-red-300 text-red-600 hover:bg-red-50"
+              }`}
+            >
+              {togglingClosed
+                ? "Guardando…"
+                : closed
+                  ? "Ya no está cerrado"
+                  : "Marcar como cerrado para siempre"}
             </button>
           </form>
         )}
