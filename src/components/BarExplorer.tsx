@@ -70,12 +70,15 @@ export default function BarExplorer({
     return allBars.filter((bar) => {
       if (q && !bar.name.toLowerCase().includes(q)) return false;
 
-      const isVisited = visits[barId(bar)]?.visited ?? false;
+      const id = barId(bar);
+      const isVisited = visits[id]?.visited ?? false;
       if (filter === "visited") return isVisited;
-      if (filter === "pending") return !isVisited;
+      // A bar that has shut for good can no longer be visited, so it is not
+      // pending anything. It still shows under "Todos".
+      if (filter === "pending") return !isVisited && !closedBars.has(id);
       return true;
     });
-  }, [allBars, query, filter, visits]);
+  }, [allBars, query, filter, visits, closedBars]);
 
   const openBar = (bar: Bar) => {
     setSelectedBar(bar);
