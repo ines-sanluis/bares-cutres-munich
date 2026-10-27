@@ -36,10 +36,12 @@ const FILTER_LABELS: Record<Filter, string> = {
 export default function BarExplorer({
   visits,
   extraBars,
+  closedBarIds,
   unlocked,
 }: {
   visits: VisitMap;
   extraBars: Bar[];
+  closedBarIds: string[];
   unlocked: boolean;
 }) {
   const [query, setQuery] = useState("");
@@ -52,6 +54,7 @@ export default function BarExplorer({
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const allBars = useMemo(() => [...bars, ...extraBars], [extraBars]);
+  const closedBars = useMemo(() => new Set(closedBarIds), [closedBarIds]);
 
   // Deliberately the original 100 only: the challenge progress must not move
   // because a new bar was added.
@@ -67,12 +70,15 @@ export default function BarExplorer({
     return allBars.filter((bar) => {
       if (q && !bar.name.toLowerCase().includes(q)) return false;
 
-      const isVisited = visits[barId(bar)]?.visited ?? false;
+      const id = barId(bar);
+      const isVisited = visits[id]?.visited ?? false;
       if (filter === "visited") return isVisited;
-      if (filter === "pending") return !isVisited;
+      // A bar that has shut for good can no longer be visited, so it is not
+      // pending anything. It still shows under "Todos".
+      if (filter === "pending") return !isVisited && !closedBars.has(id);
       return true;
     });
-  }, [allBars, query, filter, visits]);
+  }, [allBars, query, filter, visits, closedBars]);
 
   const openBar = (bar: Bar) => {
     setSelectedBar(bar);
@@ -202,6 +208,7 @@ export default function BarExplorer({
             const id = barId(bar);
             const visit = visits[id];
             const score = averageVote(visit);
+            const isClosed = closedBars.has(id);
             const isSelected = selectedBar !== null && barId(selectedBar) === id;
 
             return (
@@ -214,9 +221,16 @@ export default function BarExplorer({
                   }`}
                 >
                   <span
-                    aria-hidden
+                    aria-hidden={!isClosed}
+                    role={isClosed ? "img" : undefined}
+                    aria-label={isClosed ? "Cerrado para siempre" : undefined}
+                    title={isClosed ? "Cerrado para siempre" : undefined}
                     className={`mt-1.5 size-2 shrink-0 rounded-full ${
-                      visit?.visited ? "bg-green-700" : "bg-stone-300"
+                      isClosed
+                        ? "bg-red-600"
+                        : visit?.visited
+                          ? "bg-green-700"
+                          : "bg-stone-300"
                     }`}
                   />
                   <span className="min-w-0 flex-1">
@@ -303,6 +317,7 @@ export default function BarExplorer({
         <BarMap
           bars={filteredBars}
           visits={visits}
+          closedBars={closedBars}
           selectedBar={selectedBar}
           unlocked={unlocked}
           onSelectBar={setSelectedBar}
@@ -314,6 +329,7 @@ export default function BarExplorer({
         <VisitModal
           bar={editingBar}
           visit={visits[barId(editingBar)]}
+          closed={closedBars.has(barId(editingBar))}
           unlocked={unlocked}
           onClose={() => setEditingBar(null)}
         />

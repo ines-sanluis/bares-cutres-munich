@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { bars, GOOGLE_MAPS_ID } from "@/data/bars";
-import { MARKER_FILLS, MARKER_RING } from "@/lib/marker-colors";
+import { CLOSED_FILL, MARKER_FILLS, MARKER_RING } from "@/lib/marker-colors";
 
 export const metadata: Metadata = {
   title: "Cómo funciona · Bares cutres de Múnich",
@@ -137,6 +137,10 @@ export default function AboutPage() {
             </LegendRow>
             <LegendRow color={MARKER_FILLS.extra.visited} title="Verde claro">
               bar extra visitado.
+            </LegendRow>
+            <LegendRow color={CLOSED_FILL} title="Rojo">
+              cerrado para siempre, sea original o extra. También sale así en
+              la lista.
             </LegendRow>
           </ul>
         </Section>

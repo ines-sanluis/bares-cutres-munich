@@ -44,11 +44,20 @@ create table if not exists public.extra_bars (
   created_at timestamptz not null default now()
 );
 
+-- Bars that have shut down for good. Kept apart from visits on purpose: a bar
+-- can close before anyone went, and deleting a visit must not reopen it.
+-- Works for both the original 100 (slug ids) and extras ('x-' ids).
+create table if not exists public.closed_bars (
+  bar_id    text primary key,
+  closed_at timestamptz not null default now()
+);
+
 -- The app only ever talks to these tables from the server using the service_role
 -- key, which bypasses row level security. RLS is left on with no policies so
 -- the public anon key grants no access at all.
 alter table public.visits enable row level security;
 alter table public.extra_bars enable row level security;
+alter table public.closed_bars enable row level security;
 
 -- Public bucket: photos are readable by URL, writes still go through the server.
 insert into storage.buckets (id, name, public)

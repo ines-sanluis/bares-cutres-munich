@@ -268,10 +268,58 @@ export async function deleteBar(
       return { ok: false, error: `No se pudo borrar: ${visitError.message}` };
     }
 
+    const { error: closedError } = await supabase
+      .from("closed_bars")
+      .delete()
+      .eq("bar_id", id);
+
+    if (closedError) {
+      return { ok: false, error: `No se pudo borrar: ${closedError.message}` };
+    }
+
     const { error } = await supabase.from("extra_bars").delete().eq("id", id);
 
     if (error) {
       return { ok: false, error: `No se pudo borrar: ${error.message}` };
+    }
+
+    refresh();
+    return { ok: true, error: null };
+  } catch (error) {
+    return { ok: false, error: messageFrom(error) };
+  }
+}
+
+/**
+ * Marks a bar as closed for good, or reopens it. Independent of the visit, so a
+ * bar can close before anyone went and deleting a visit leaves it closed.
+ */
+export async function setBarClosed(
+  _prevState: BarFormState,
+  formData: FormData,
+): Promise<BarFormState> {
+  if (!(await isUnlocked())) {
+    return { ok: false, error: LOCKED_MESSAGE };
+  }
+
+  const id = String(formData.get("barId") ?? "");
+  const closed = formData.get("closed") === "true";
+
+  try {
+    const supabase = requireSupabase();
+
+    if (!(await isKnownBar(supabase, id))) {
+      return { ok: false, error: UNKNOWN_BAR_MESSAGE };
+    }
+
+    const { error } = closed
+      ? await supabase
+          .from("closed_bars")
+          .upsert({ bar_id: id }, { onConflict: "bar_id" })
+      : await supabase.from("closed_bars").delete().eq("bar_id", id);
+
+    if (error) {
+      return { ok: false, error: `No se pudo guardar: ${error.message}` };
     }
 
     refresh();
